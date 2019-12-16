@@ -1,7 +1,7 @@
 # nexusmods_downloadfix
 Userscript to fix the dumb new nexusmods update 
 
-If you're here, chances are you're looking to get rid of the predatory dogshit download pop-up the nexus administration has shoved into your face recently.
+If you're here, chances are you're looking to get rid of the shameless download pop-up the nexus administration has shoved into your face recently.
 
 You're in luck! I have used my meager javascript knowledge to develop a script that completely bypasses this nonsense.
 
@@ -30,6 +30,12 @@ After installing an extension of your choice, you can go to the install link and
 [Source](https://github.com/randomtdev/nexusmods_downloadfix)
 
 ### Updates ####
+
+**1.3(Compatibility is such a pain)**
+
+- Fixed jQuery issues?
+- Added a fallback in case the post_load detour fails; This makes it compatible with greasemonkey and well.. adds a fallback. 
+- script now initializes using window.onload
 
 **1.2**
 
