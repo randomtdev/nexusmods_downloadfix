@@ -5,12 +5,13 @@
 // @include         *://www.nexusmods.com/*/mods/*?tab=files&file_id=*
 // @include         *://www.nexusmods.com/*/mods/*
 // @grant           none
-// @version         1.2
+// @version         1.3
 // @author          randomtdev
 // @require         https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js
 // @updateURL       https://gitcdn.xyz/repo/randomtdev/nexusmods_downloadfix/master/nexusmods_downloadfix.meta.js
 // @downloadURL     https://gitcdn.xyz/repo/randomtdev/nexusmods_downloadfix/master/nexusmods_downloadfix.user.js
 // @homepageURL     https://github.com/randomtdev/nexusmods_downloadfix
+// @run-at			document-start
 // ==/UserScript==
 
 // This is a script to partially work around the fact that nexus has become some shitty third-rate download site with constant (shameless) "SLOW DOWNLOAD OR PREMIUM DOWNLOAD BUY ME PLEASE I'M BETTER" prompts That also of course make you wait 5 seconds and bug you to buy premium.
@@ -22,9 +23,7 @@
 
 
 // Anyway, you guys make some shameless cash grab and I'll shamelessly bypass it and release it. Fuck you. Once this gets fixed I'll just bypass it again
-
-// Set this to false if you don't want to automatically endorse downloaded mods. But does it really hurt you at all?
-var AUTO_ENDORSE = true
+this.$ = this.jQuery = jQuery.noConflict(true);
 
 var patchedButtons = false
 
@@ -52,8 +51,7 @@ function SetButtonLabel(button, text) {
 }
 
 // Tell the server we've downloaded the mod so the user can endorse it and it counts towards the DL count (whoops)
-function ActuallyDownloadTheMod(href)
-{
+function ActuallyDownloadTheMod(href) {
     var q2 = $("#section.modpage")
     if (q2.length > 0) // We only want to click endorse button if we haven't already endorsed the mod.
     {
@@ -73,13 +71,12 @@ function ActuallyDownloadTheMod(href)
                 fid: fileId,
                 game_id: gameId,
             },
-            success: function()
-            {
+            success: function () {
                 $('a svg.icon-endorse').parent().removeClass('btn-inactive');
                 $('a svg.icon-vote').parent().removeClass('btn-inactive');
             }
         });
-        
+
     }
 }
 
@@ -109,8 +106,7 @@ function PatchButton(button) {
             data: "",
             success: function (response) {
                 var match = response.match(/data-download-url="(.*)"/)
-                if (!match)
-                {
+                if (!match) {
                     alert("Download Failed! Are you logged in?")
                     SetButtonLabel(button, originalText)
                     return
@@ -144,8 +140,7 @@ function PatchButton(button) {
                 button.doingCache = false
 
                 var match = response.match(/data-download-url="(.*)"/)
-                if (!match)
-                {
+                if (!match) {
                     alert("Download Failed! Are you logged in?")
                     SetButtonLabel(button, txt)
                     return
@@ -238,54 +233,82 @@ function PatchDownloadButtons() {
     return true
 }
 
-function RemoveAdblockBanner()
-{
-  if ($(".premium-banner").remove().length > 0) // oh no not the premium banner
-        {
-            console.log("Removed premium nag banner")
-        } 
+function RemoveAdblockBanner() {
+    if ($(".premium-banner").remove().length > 0) // oh no not the premium banner
+    {
+        console.log("Removed premium nag banner")
+    }
 }
 
-if (document.URL.indexOf("&file_id=") == -1) // Is this NOT the download page?
-{
-    PatchButtonBySpanText("Manual")
-    PatchButtonBySpanText("Vortex")
+function Initialize() {
+    if (document.URL.indexOf("&file_id=") == -1) // Is this NOT the download page?
+    {
+        PatchButtonBySpanText("Manual")
+        PatchButtonBySpanText("Vortex")
 
-    // After a new page is loaded, patch download buttons if the file tab exists.
-    // Pretty hacky but it works better than what I was doing before (never again)
-    var original_post_load = window.post_load
-    window.post_load = function () {
-        original_post_load()
+        // After a new page is loaded, patch download buttons if the file tab exists.
+        // Pretty hacky but it works better than what I was doing before (never again)
 
-        if ($('#mod_files').length > 0) { // Is this the files page?
-            console.log("Loaded new file page; Trying to patch download buttons")
-            if (PatchDownloadButtons()) {
-                console.log("We did dem button patches boi")
-                patchedButtons = true
-            } else {
-                console.error("Looks like we failed to do button patches without an exception some reason. No buttons?")
+        console.log("patching postload (won't work on greasemonkey)", window.post_load)
+        if (!window.post_load) // oh god why no please
+        {
+            console.log("post_load func not found; using fallback")
+            setInterval(function () {
+                var q = $("#mod_files")
+                if (q.length > 0 && !q[0].patched) {
+                    var page = q[0]
+                    q[0].patched = true
+
+                    console.log("postload fallback")
+                    console.log("Loaded new file page; Trying to patch download buttons")
+                    if (PatchDownloadButtons()) {
+                        console.log("We did dem button patches boi")
+                        patchedButtons = true
+                    } else {
+                        console.error("Looks like we failed to do button patches without an exception some reason. No buttons?")
+                    }
+                }
+            }, 100)
+        } else {
+            var original_post_load = window.post_load
+            window.post_load = function () {
+                original_post_load()
+                console.log("postload")
+
+                if ($('#mod_files').length > 0) { // Is this the files page?
+                    console.log("Loaded new file page; Trying to patch download buttons")
+                    if (PatchDownloadButtons()) {
+                        console.log("We did dem button patches boi")
+                        patchedButtons = true
+                    } else {
+                        console.error("Looks like we failed to do button patches without an exception some reason. No buttons?")
+                    }
+                }
+                RemoveAdblockBanner()
+            }
+
+            if (document.URL.indexOf("?tab=files") > -1) // Do initial patches if we're loading the files page directly.
+            {
+                if (PatchDownloadButtons()) {
+                    console.log("We did dem button patches boi")
+                    patchedButtons = true
+                } else {
+                    console.error("Looks like we failed to do button patches without an exception some reason. No buttons?")
+                }
+                RemoveAdblockBanner()
             }
         }
-				RemoveAdblockBanner()
-    }
 
-    $("#rj-vortex").remove() // Nooooo not the 124px tall vortex banner!!! (like can you get any more obnoxious please)
-    $(".agroup.clearfix").remove() // whoops there goes the ad banner
-    console.log("Removed Vortex/Ad banners")
 
-    if (document.URL.indexOf("?tab=files") > -1) // Do initial patches if we're loading the files page directly.
-    {
-        if (PatchDownloadButtons()) {
-            console.log("We did dem button patches boi")
-            patchedButtons = true
-        } else {
-            console.error("Looks like we failed to do button patches without an exception some reason. No buttons?")
-        }
-      	RemoveAdblockBanner()
+        $("#rj-vortex").remove() // Nooooo not the 124px tall vortex banner!!! (like can you get any more obnoxious please)
+        $(".agroup.clearfix").remove() // whoops there goes the ad banner
+        console.log("Removed Vortex/Ad banners")
+
+
+        return
     }
-    return
 }
-
+window.onload = Initialize
 // This portion was here before I did the button patching; Leaving it here as a failsafe in case patching fails or bugs out.
 
 var slowBtn = $('#slowDownloadButton')
@@ -296,8 +319,7 @@ slowBtn.children("span").text("BOO YOU SUCK");
 fastBtn.children("span").text("BUY PREMIUM BRO");
 
 var url = slowBtn.attr("data-download-url") // Get URL directly from attribute(lmao) instead of waiting 5 seconds(also lmao what has this website become)
-if (!url)
-{
+if (!url) {
     return
 }
 window.location.href = url // Redirect to actual download link
