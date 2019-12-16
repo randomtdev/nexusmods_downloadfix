@@ -49,6 +49,7 @@ After installing an extension of your choice, you can go to the install link and
 ## What this does **NOT** do ##
 
 * Bypass the 1-2MB download speed restriction on non-premium users.
+* Block ads
 * Give you premium
 * Make you cool
 * Give you brownie points with admins
