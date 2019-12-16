@@ -7,7 +7,7 @@ You're in luck! I have used my meager javascript knowledge to develop a script t
 
 I'm sure some of you want to nail me to a stake and burn me like a witch, but I really don't care.
 
-##Endorse Mods!##
+## Endorse Mods! ##
 
 People work quite a bit to deliver you the (probably)quality stuff you're using. The least you can do is press a button to let the mod developer know you enjoyed the mod.
 
@@ -29,7 +29,7 @@ After installing an extension of your choice, you can go to the install link and
 
 [Source](https://github.com/randomtdev/nexusmods_downloadfix)
 
-###Updates####
+### Updates ####
 
 **1.2**
 
@@ -59,7 +59,7 @@ Basically what the script does behind the scenes is simply request the page the 
 
 This means no 5 second wait and no "PREMIUM BUY ME PLEASE".
 
-#**Disclaimer**#
+# **Disclaimer** #
 
 The script is in the end a roundabout way to bypass the redirect. The actual speed will depend on your connection and latency to the nexusmods servers among other factors. Sometimes preparing a download will take 5 seconds regardless. Still, you will skip the annoying redirects.
 
