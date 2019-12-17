@@ -5,7 +5,7 @@
 // @include         *://www.nexusmods.com/*/mods/*?tab=files&file_id=*
 // @include         *://www.nexusmods.com/*/mods/*
 // @grant           none
-// @version         1.3
+// @version         1.3.1
 // @author          randomtdev
 // @require         https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js
 // @updateURL       https://gitcdn.xyz/repo/randomtdev/nexusmods_downloadfix/master/nexusmods_downloadfix.meta.js
@@ -189,12 +189,15 @@ function PatchButtonBySpanText(text) {
     if (q.length == 0 || q[0].patched) {
         return
     }
-    q[0].patched = true
-
+    
     var btn = q[0].parentNode
-    if (!PatchFixModRequirements(btn)) {
+
+    // We don't want to patch this button if it just leads to the files page, because I guess that's a thing for multiple files.
+    if (!PatchFixModRequirements(btn) && btn.getAttribute("href").indexOf("&file_id=") != -1) 
+    {
         PatchButton(btn)
     }
+    q[0].patched = true
     console.log("Patched", text, "button")
 }
 

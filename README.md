@@ -31,6 +31,10 @@ After installing an extension of your choice, you can go to the install link and
 
 ### Updates ####
 
+**1.3.1**
+
+- Fixed an issue where the manual/vortex download buttons at the top right would give a "Download failed error" on mods with multiple main files
+
 **1.3(Compatibility is such a pain)**
 
 - Fixed jQuery issues?
