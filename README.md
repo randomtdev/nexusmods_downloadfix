@@ -31,6 +31,17 @@ After installing an extension of your choice, you can go to the install link and
 
 ### Updates ####
 
+**1.4**
+
+- Fix for new site update
+- Vortex banner is no longer being removed
+- Adblock banner is no longer removed (Not even sure this still exists)
+- Improved shitty patching system a bit
+- Cleaned up code quite a bit
+
+This new update makes getting the link for manual downloads a lot faster, courtesy of nexus staff. 
+The script should also now work fine for premium users, if for some reason you're using this.
+
 **1.3.1**
 
 - Fixed an issue where the manual/vortex download buttons at the top right would give a "Download failed error" on mods with multiple main files
@@ -52,8 +63,6 @@ After installing an extension of your choice, you can go to the install link and
 
 ## What this does ##
 * Bypasses the redirect upon downloads that nags you to buy premium and forces you to wait 5 seconds if you don't.
-* Removes Adblock banner
-* Removes Vortex banner
 * Removes premium nag banner on files page
 
 ## What this does **NOT** do ##
