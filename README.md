@@ -30,6 +30,10 @@ After installing an extension of your choice, you can go to the install link and
 
 ### Updates ####
 
+**1.5.1**
+
+- Fixed issue where closing requirements popup before downloading would stop download button from working properly when re-opening
+
 **1.5**
 
 - Improved patch process for buttons/requirement window. Requirement window download button should now always work properly.

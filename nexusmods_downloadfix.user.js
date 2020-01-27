@@ -5,7 +5,7 @@
 // @include         *://www.nexusmods.com/*/mods/*?tab=files&file_id=*
 // @include         *://www.nexusmods.com/*/mods/*
 // @grant           none
-// @version         1.5
+// @version         1.5.1
 // @author          randomtdev
 // @require         https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js
 // @updateURL       https://gitcdn.xyz/repo/randomtdev/nexusmods_downloadfix/master/nexusmods_downloadfix.meta.js
@@ -273,14 +273,14 @@ function Initialize() {
         // If only I knew about this stuff sooner
         
         window.jQuery(document).ajaxComplete(function (e, request, settings) {
-            console.log("ajaxComplete", settings)
+            //console.log("ajaxComplete", settings)
             if (settings.url.indexOf("ModFilesTab") != -1) // Was the files tab just loaded?
             {
                 InitializePatches() // do button patches then
                 RemoveAdblockBanner()
-
-                AddButtonEvents()
             }
+
+            AddButtonEvents()
         })
 
         if (document.URL.indexOf("?tab=files") > -1) // Do initial patches if we're loading the files page directly.
