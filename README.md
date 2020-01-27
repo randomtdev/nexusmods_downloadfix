@@ -16,7 +16,6 @@ You can install the script below with your userscript manager of choice.
 
 Options include:
 
-* Greasemonkey ^[Firefox](https://addons.mozilla.org/en-US/firefox/addon/greasemonkey/), 
 * Tampermonkey ^[Chrome](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo)  ^[Firefox](https://addons.mozilla.org/en-US/firefox/addon/tampermonkey/)
 * Violentmonkey ^[Chrome](https://chrome.google.com/webstore/detail/violentmonkey/jinjaccalgkegednnccohejagnlnfdag)
   ^[Firefox](https://addons.mozilla.org/en-US/firefox/addon/violentmonkey/)
@@ -30,6 +29,17 @@ After installing an extension of your choice, you can go to the install link and
 [Source](https://github.com/randomtdev/nexusmods_downloadfix)
 
 ### Updates ####
+
+**1.5**
+
+- Improved patch process for buttons/requirement window. Requirement window download button should now always work properly.
+- Fixed issue where pressing the download button multiple times would come up with an error and redirect you to the premium page.
+- Fixed premium page auto-download fallback
+
+**Greasemonkey is no longer supported as of this version**
+
+It's a pain in the ass.
+
 
 **1.4**
 

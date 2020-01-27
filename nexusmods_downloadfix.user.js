@@ -5,7 +5,7 @@
 // @include         *://www.nexusmods.com/*/mods/*?tab=files&file_id=*
 // @include         *://www.nexusmods.com/*/mods/*
 // @grant           none
-// @version         1.4
+// @version         1.5
 // @author          randomtdev
 // @require         https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js
 // @updateURL       https://gitcdn.xyz/repo/randomtdev/nexusmods_downloadfix/master/nexusmods_downloadfix.meta.js
@@ -29,7 +29,6 @@
 */
 this.$ = this.jQuery = jQuery.noConflict(true);
 
-var patchedButtons = false
 //var currentUrlParams = new URLSearchParams(new URL(document.URL))
 
 function GetDownloadButtons() {
@@ -38,6 +37,10 @@ function GetDownloadButtons() {
 }
 
 function GetButtonLabel(button) {
+    if (!button)
+    {
+        return
+    }
     var element = button.getElementsByTagName("span")[0]
     if (!element) {
         element = button
@@ -84,20 +87,22 @@ function DownloadFile(href, button)
                 success: function (response) {
                     var match = response.match(/data-download-url="(.*)"/)
                     if (!match) {
-                        alert("Download Failed! Are you logged in?")
+                        DisplayPopup("DownloadFix script error", "Download Failed! Are you logged in?")
                         SetButtonLabel(button, originalText)
                         return
                     }
                     console.log("Got nxm link ", match[1])
                     window.location.href = match[1]
     
-                    $('button.mfp-close').click() // Close mod requirements popup if any
-
                     SetButtonLabel(button, "Got link!")
 
                     setTimeout(function () {
                         SetButtonLabel(button, originalText)
+                        if (button)
+                            button.downloading = false
                     }, 5000)
+                    AddButtonEvents()
+                    ClosePopUp() // Close mod requirements popup if any
                 }
             });
         }
@@ -115,21 +120,28 @@ function DownloadFile(href, button)
                         game_id: gameId,
                     },
                     success: function (data) {
+                        if (button)
+                            button.downloading = false
+
                         if (data && data.url) {
                             window.location.href = data.url;
-                            $('button.mfp-close').click() // Close mod requirements popup if any
 
                             // This is pretty pointless because you can't use them, but whatever.
                             $('a svg.icon-endorse').parent().removeClass('btn-inactive');
                             $('a svg.icon-vote').parent().removeClass('btn-inactive');
+                            AddButtonEvents()
+                            ClosePopUp() // Close mod requirements popup if any
                         } else {
-                            alert("Download Failed! Request went through, but couldn't get URL.\n\nAre you logged in?")
                             console.error("GenerateDownloadUrl failed; Got data ", data)
+                            DisplayPopup("DownloadFix script error", "Download Failed! Request went through, but couldn't get URL.\n\nAre you logged in?")
                         }
                     },
-                    error: function () {
-                        console.error("Download request failed for file", fileId)
-                        alert("Download request failed!")
+                    error: function (_, s, e) {
+                        if (button)
+                            button.downloading = false
+
+                        console.error("Download request failed for file", fileId, s, e)
+                        DisplayPopup("DownloadFix script error", "Download request failed!")
                     }
                 }
             );
@@ -147,33 +159,16 @@ function PatchButton(button) {
 
     if (link.includes("ModRequirementsPopUp"))
     {
-        button.requirements = true
+        return
     }
     
     button.addEventListener("click", function (e) {
-        if (button.popup && button.downloaded)
-        {
-            return
-        }
+        e.preventDefault()
 
-        if (button.requirements)
+        if (!button.downloading) // Make sure we're not sending more requests while downloading; Won't work anyway.
         {
-            var findDownload = setInterval(function () {
-                var btn = $("a.btn:contains('Download')")
-                if (btn.length > 0) {
-                    console.log("patching popup download btn")
-                    clearInterval(findDownload)
-                    btn[0].popup = true
-                    PatchButton(btn[0])
-                }
-            }, 300)
-        }
-        else
-        {
-            e.preventDefault()
-
+            button.downloading = true
             DownloadFile(link, button)
-            button.downloaded = true
         }
 
     })
@@ -248,11 +243,25 @@ function RemoveAdblockBanner() {
 function InitializePatches()
 {
     if (PatchDownloadButtons()) {
-        console.log("We did dem button patches boi")
-        patchedButtons = true
+        console.log("Patched download buttons")
     } else {
         console.error("Looks like we failed to do button patches without an exception some reason. No buttons?")
     }
+}
+
+function AddButtonEvents()
+{
+    var buttons = window.jQuery('.popup-btn-ajax > span:contains("download")').parent().magnificPopup({
+        type: 'ajax',
+        fixedContentPos: false,
+        callbacks: {
+            parseAjax: function (mfpResponse) {
+                mfpResponse.data = $.parseHTML(mfpResponse.data);
+                PatchButton($(mfpResponse.data).find("a.btn")[0])
+            }
+        },
+    })
+    //console.log(buttons)
 }
 
 function Initialize() {
@@ -261,42 +270,24 @@ function Initialize() {
         PatchButtonBySpanText("Manual")
         PatchButtonBySpanText("Vortex")
 
-        // After a new page is loaded, patch download buttons if the file tab exists.
-        // Pretty hacky but it works better than what I was doing before (never again)
-
-        console.log("patching postload (won't work on greasemonkey)", window.post_load)
-        if (!window.post_load) // oh god why no please
-        {
-            console.log("post_load func not found; using fallback")
-            setInterval(function () {
-                var q = $("#mod_files")
-                if (q.length > 0 && !q[0].patched) {
-                    var page = q[0]
-                    q[0].patched = true
-
-                    console.log("postload fallback")
-                    console.log("Loaded new file page; Trying to patch download buttons")
-                    InitializePatches()
-                }
-            }, 100)
-        } else {
-            var original_post_load = window.post_load
-            window.post_load = function () {
-                original_post_load()
-                console.log("postload")
-
-                if ($('#mod_files').length > 0) { // Is this the files page?
-                    console.log("Loaded new file page; Trying to patch download buttons")
-                    InitializePatches()
-                }
-                RemoveAdblockBanner()
-            }
-
-            if (document.URL.indexOf("?tab=files") > -1) // Do initial patches if we're loading the files page directly.
+        // If only I knew about this stuff sooner
+        
+        window.jQuery(document).ajaxComplete(function (e, request, settings) {
+            console.log("ajaxComplete", settings)
+            if (settings.url.indexOf("ModFilesTab") != -1) // Was the files tab just loaded?
             {
-                InitializePatches()
+                InitializePatches() // do button patches then
                 RemoveAdblockBanner()
+
+                AddButtonEvents()
             }
+        })
+
+        if (document.URL.indexOf("?tab=files") > -1) // Do initial patches if we're loading the files page directly.
+        {
+            InitializePatches()
+            RemoveAdblockBanner()
+            AddButtonEvents()
         }
 
         return
@@ -318,4 +309,3 @@ function Initialize() {
     }
 }
 window.onload = Initialize
-
