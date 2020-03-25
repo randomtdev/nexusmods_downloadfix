@@ -5,7 +5,7 @@
 // @include         *://www.nexusmods.com/*/mods/*?tab=files&file_id=*
 // @include         *://www.nexusmods.com/*/mods/*
 // @grant           none
-// @version         1.5.1
+// @version         1.5.2
 // @author          randomtdev
 // @require         https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js
 // @updateURL       https://gitcdn.xyz/repo/randomtdev/nexusmods_downloadfix/master/nexusmods_downloadfix.meta.js
@@ -194,6 +194,7 @@ function PatchButtonBySpanText(text) {
     if (IsDownloadButton(btn)) 
     {
         PatchButton(btn)
+        AddButtonEvent(btn)
     }
     q[0].patched = true
     console.log("Patched", text, "button")
@@ -247,6 +248,20 @@ function InitializePatches()
     } else {
         console.error("Looks like we failed to do button patches without an exception some reason. No buttons?")
     }
+}
+
+function AddButtonEvent(btn)
+{
+    window.jQuery(btn).magnificPopup({
+        type: 'ajax',
+        fixedContentPos: false,
+        callbacks: {
+            parseAjax: function (mfpResponse) {
+                mfpResponse.data = $.parseHTML(mfpResponse.data);
+                PatchButton($(mfpResponse.data).find("a.btn")[0])
+            }
+        }
+    })
 }
 
 function AddButtonEvents()

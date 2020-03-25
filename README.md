@@ -30,6 +30,10 @@ After installing an extension of your choice, you can go to the install link and
 
 ### Updates ####
 
+**1.5.2**
+
+- Fixed top-right buttons not working properly if the mod has DLC/Mod requirements
+
 **1.5.1**
 
 - Fixed issue where closing requirements popup before downloading would stop download button from working properly when re-opening
