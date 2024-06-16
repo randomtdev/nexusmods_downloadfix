@@ -85,7 +85,13 @@ function DownloadFile(href, button)
                 url: href,
                 data: "",
                 success: function (response) {
-                    var match = response.match(/id="dl_link" value="(.*)"/)
+                    var prem = false
+                    var match = response.match(/data-download-url="(.*)"/)
+                    // Premium
+                    if (!match) {
+                       var match = response.match(/id="dl_link" value="(.*)"/)
+                       var prem = true
+                    }
                     if (!match) {
                         DisplayPopup("DownloadFix script error", "Download Failed! Are you logged in?")
                         SetButtonLabel(button, originalText)
@@ -94,7 +100,9 @@ function DownloadFile(href, button)
                     console.log("Got nxm link ", match[1])
                     window.location.href = match[1]
 
-                    $.magnificPopup.close();
+                    if (prem) {
+                      $.magnificPopup.close();
+                    }
     
                     SetButtonLabel(button, "Got link!")
 
