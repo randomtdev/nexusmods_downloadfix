@@ -139,6 +139,7 @@ function DownloadFile(href, button)
                             // This is pretty pointless because you can't use them, but whatever.
                             $('a svg.icon-endorse').parent().removeClass('btn-inactive');
                             $('a svg.icon-vote').parent().removeClass('btn-inactive');
+                            $.magnificPopup.close();
                             AddButtonEvents()
                             ClosePopUp() // Close mod requirements popup if any
                         } else {
