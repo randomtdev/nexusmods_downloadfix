@@ -1,11 +1,5 @@
 # nexusmods_downloadfix
-Userscript to fix the dumb new nexusmods update 
-
-If you're here, chances are you're looking to get rid of the shameless download pop-up the nexus administration has shoved into your face recently.
-
-You're in luck! I have used my meager javascript knowledge to develop a script that completely bypasses this nonsense.
-
-I'm sure some of you want to nail me to a stake and burn me like a witch, but I really don't care.
+Userscript to bypass the premium nag screen when downloading mods on nexus.
 
 ## Endorse Mods! ##
 
@@ -29,6 +23,11 @@ After installing an extension of your choice, you can go to the install link and
 [Source](https://github.com/randomtdev/nexusmods_downloadfix)
 
 ### Updates ####
+
+**1.6**
+- Fix script
+- Made button patching more reliable
+- Merge derickso's PR to fix the script for premium users.
 
 **1.5.2**
 
