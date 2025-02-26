@@ -87,17 +87,7 @@ The script should also now work fine for premium users, if for some reason you'r
 * Bypass the 1-2MB download speed restriction on non-premium users.
 * Block ads
 * Give you premium
-* Make you cool
-* Give you brownie points with admins
-
-## How does it work ##
-
-Basically what the script does behind the scenes is simply request the page the button would lead you to and grab the *real* download link for you, practically bypassing it for the user. 
-
-This means no 5 second wait and no "PREMIUM BUY ME PLEASE".
 
 # **Disclaimer** #
 
 The script is in the end a roundabout way to bypass the redirect. The actual speed will depend on your connection and latency to the nexusmods servers among other factors. Sometimes preparing a download will take 5 seconds regardless. Still, you will skip the annoying redirects.
-
-NOTE: If you are a premium user this script probably won't work for you. As you might have imagined, I'm not premium so I can't really check to know for sure.
