@@ -24,6 +24,9 @@ After installing an extension of your choice, you can go to the install link and
 
 ### Updates ####
 
+**1.6.1**
+- Fix script not working for downloads with no mod requirements
+
 **1.6**
 - Fix script
 - Made button patching more reliable
