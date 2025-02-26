@@ -5,7 +5,7 @@
 // @include         *://www.nexusmods.com/*/mods/*?tab=files&file_id=*
 // @include         *://www.nexusmods.com/*/mods/*
 // @grant           none
-// @version         1.5.2
+// @version         1.6.0
 // @author          randomtdev
 // @require         https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js
 // @updateURL       https://gitcdn.xyz/repo/randomtdev/nexusmods_downloadfix/master/nexusmods_downloadfix.meta.js
@@ -85,7 +85,13 @@ function DownloadFile(href, button)
                 url: href,
                 data: "",
                 success: function (response) {
+                    var prem = false
                     var match = response.match(/data-download-url="(.*)"/)
+                    // Premium
+                    if (!match) {
+                       var match = response.match(/id="dl_link" value="(.*)"/)
+                       var prem = true
+                    }
                     if (!match) {
                         DisplayPopup("DownloadFix script error", "Download Failed! Are you logged in?")
                         SetButtonLabel(button, originalText)
@@ -93,6 +99,10 @@ function DownloadFile(href, button)
                     }
                     console.log("Got nxm link ", match[1])
                     window.location.href = match[1]
+
+                    if (prem) {
+                      $.magnificPopup.close();
+                    }
     
                     SetButtonLabel(button, "Got link!")
 
@@ -129,6 +139,7 @@ function DownloadFile(href, button)
                             // This is pretty pointless because you can't use them, but whatever.
                             $('a svg.icon-endorse').parent().removeClass('btn-inactive');
                             $('a svg.icon-vote').parent().removeClass('btn-inactive');
+                            $.magnificPopup.close();
                             AddButtonEvents()
                             ClosePopUp() // Close mod requirements popup if any
                         } else {
@@ -157,7 +168,7 @@ function DownloadFile(href, button)
 function PatchButton(button) {
     var link = button.getAttribute("href")
 
-    if (link.includes("ModRequirementsPopUp"))
+    if (link.includes("ModRequirementsPopUp") || link.includes("download-top-left-panel"))
     {
         return
     }
