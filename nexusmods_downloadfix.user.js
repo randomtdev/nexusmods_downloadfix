@@ -5,7 +5,7 @@
 // @include         *://www.nexusmods.com/*/mods/*?tab=files&file_id=*
 // @include         *://www.nexusmods.com/*/mods/*
 // @grant           none
-// @version         1.6.0
+// @version         1.6.1
 // @author          randomtdev
 // @require         https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js
 // @homepageURL     https://github.com/randomtdev/nexusmods_downloadfix
@@ -206,24 +206,22 @@ function PatchDownloadButtons() {
     }
 
     for (var i = 0; i < buttons.length; i++) {
-        var span = buttons[i]
-        if (span && span.parentNode) {
-            var button = span.parentNode
-
-            if (button.patched) {
+        var btn = buttons[i]
+        if (btn) {
+            if (btn.patched) {
                 continue
             }
-            //console.log(button)
 
-            if (IsDownloadButton(button))
+            if (IsDownloadButton(btn))
             {
-                PatchButton(button)
+                PatchButton(btn)
+                count++;
             }
 
         }
     }
 
-
+    console.log("Patched", count, "download buttons")
     return true
 }
 
@@ -236,9 +234,7 @@ function RemoveAdblockBanner() {
 
 function InitializePatches()
 {
-    if (PatchDownloadButtons()) {
-        console.log("Patched download buttons")
-    } else {
+    if (!PatchDownloadButtons()) {
         console.error("Looks like we failed to do button patches without an exception some reason. No buttons?")
     }
 }
