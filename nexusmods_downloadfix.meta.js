@@ -5,7 +5,7 @@
 // @include         *://www.nexusmods.com/*/mods/*?tab=files&file_id=*
 // @include         *://www.nexusmods.com/*/mods/*
 // @grant           none
-// @version         1.6.0
+// @version         1.6.1
 // @author          randomtdev
 // @require         https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js
 // @homepageURL     https://github.com/randomtdev/nexusmods_downloadfix
