@@ -194,10 +194,10 @@ function IsDownloadButton(button)
 }
 
 function PatchDownloadButtons() {
-    if (document.URL.indexOf("?tab=files") == -1)
+    /*if (document.URL.indexOf("?tab=files") == -1)
     {
         return false
-    }
+    }*/
 
     var count = 0
     var buttons = GetDownloadButtons()
@@ -242,10 +242,13 @@ function InitializePatches()
 function Initialize() {
     if (document.URL.indexOf("&file_id=") == -1) // Is this NOT the download page?
     {
+        InitializePatches()
+        RemoveAdblockBanner()
+
         window.jQuery(document).ajaxComplete(function (e, request, settings) {
             if (settings.url.indexOf("ModFilesTab") != -1) // Was the files tab just loaded?
             {
-                InitializePatches() // do button patches then
+                InitializePatches() // re-do button patches then
                 RemoveAdblockBanner()
             }
 
@@ -262,11 +265,11 @@ function Initialize() {
 
         })
 
-        if (document.URL.indexOf("?tab=files") > -1) // Do initial patches if we're loading the files page directly.
+        /*if (document.URL.indexOf("?tab=files") > -1) // Do initial patches if we're loading the files page directly.
         {
             InitializePatches()
             RemoveAdblockBanner()
-        }
+        }*/
 
         return
     }
