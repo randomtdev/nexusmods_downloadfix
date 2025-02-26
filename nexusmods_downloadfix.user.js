@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            Nexus Download Fix
-// @description     Fixing the dumb new download system for nexusmods
+// @description     Bypass premium nag screen for downloads on nexusmods.
 // @namespace       randomtdev
 // @include         *://www.nexusmods.com/*/mods/*?tab=files&file_id=*
 // @include         *://www.nexusmods.com/*/mods/*
@@ -8,32 +8,14 @@
 // @version         1.6.0
 // @author          randomtdev
 // @require         https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js
-// @updateURL       https://gitcdn.xyz/repo/randomtdev/nexusmods_downloadfix/master/nexusmods_downloadfix.meta.js
-// @downloadURL     https://gitcdn.xyz/repo/randomtdev/nexusmods_downloadfix/master/nexusmods_downloadfix.user.js
 // @homepageURL     https://github.com/randomtdev/nexusmods_downloadfix
-// @run-at			document-start
+// @run-at			    document-start
 // ==/UserScript==
 
-// This is a script to partially work around the fact that nexus has become some shitty third-rate download site with constant (shameless) "SLOW DOWNLOAD OR PREMIUM DOWNLOAD BUY ME PLEASE I'M BETTER" prompts that also of course make you wait 5 seconds and bug you to buy premium.
-
-/* Update 1.4 (2020-01-24)
-
-   Hey me; It's you, 1 month later! It's 2020 now. A new update a couple days ago by the nexus staff broke the script, under the pretense that the script didn't tell nexus it downloaded the file.
-   This is partially true, as the first versions of the script did not do this. This was fixed shortly after though. The latest version of the script did in fact do this.
-   I'm unsure if there's concern over said outdated version of the script or if it's just bullshit, but in any case it's basically a given in this version (1.4)
-   The change they made actually makes it significantly easier and faster for the script, essentially completely restoring the original experience of the site(for manual downloads). 
-   The post in question; https://old.reddit.com/r/skyrimmods/comments/ernl7e/is_anybody_else_unable_to_manually_download_files/ff563z6/
-   In case it gets deleted; https://i.imgur.com/Vovlf73.png
-
-   Thanks to the guys on github issue reporting for the reddit link & error report
-*/
 this.$ = this.jQuery = jQuery.noConflict(true);
 
-//var currentUrlParams = new URLSearchParams(new URL(document.URL))
-
 function GetDownloadButtons() {
-    // nice one m8, real genius right here
-    return $('a.btn.inline-flex > span:contains("download")')
+    return $('a.btn.inline-flex[data-tracking*="Download"]')
 }
 
 function GetButtonLabel(button) {
@@ -50,7 +32,7 @@ function GetButtonLabel(button) {
 }
 
 function SetButtonLabel(button, text) {
-    if (!button) 
+    if (!button)
     {
         return
     }
@@ -60,6 +42,7 @@ function SetButtonLabel(button, text) {
         element = button
     }
 
+    let oldText = element.innerHTML
     element.innerHTML = text
 }
 
@@ -75,12 +58,12 @@ function DownloadFile(href, button)
         var gameId = section.getAttribute("data-game-id")
         var fileId = params.get("file_id") || params.get("id")
 
+        var originalText = GetButtonLabel(button)
         if (params.get("nmm"))
         {
             console.log("Requesting premium page to get NXM protocol link")
-            var originalText = GetButtonLabel(button)
-
             SetButtonLabel(button, "Getting link...")
+
             $.ajax({
                 url: href,
                 data: "",
@@ -89,21 +72,26 @@ function DownloadFile(href, button)
                     var match = response.match(/data-download-url="(.*)"/)
                     // Premium
                     if (!match) {
-                       var match = response.match(/id="dl_link" value="(.*)"/)
-                       var prem = true
+                      match = response.match(/id="dl_link" value="(.*)"/)
+                      prem = true
                     }
+
                     if (!match) {
                         DisplayPopup("DownloadFix script error", "Download Failed! Are you logged in?")
                         SetButtonLabel(button, originalText)
                         return
                     }
-                    console.log("Got nxm link ", match[1])
-                    window.location.href = match[1]
 
-                    if (prem) {
+                    // URL Param symbols in the html are escaping for some reason when they weren't before, so this is a hack to fix that.
+                    var url = match[1].replaceAll(";", "&")
+
+                    console.log("Got nxm link ", url)
+                    window.location.href = url
+
+                  if (prem) {
                       $.magnificPopup.close();
                     }
-    
+
                     SetButtonLabel(button, "Got link!")
 
                     setTimeout(function () {
@@ -111,7 +99,6 @@ function DownloadFile(href, button)
                         if (button)
                             button.downloading = false
                     }, 5000)
-                    AddButtonEvents()
                     ClosePopUp() // Close mod requirements popup if any
                 }
             });
@@ -120,7 +107,7 @@ function DownloadFile(href, button)
         {
             console.log("Requesting download URL for file", fileId, "with game ID", gameId)
 
-            // Guess I wont complain if we have this, and I certainly won't point out any issues with them doing this. Nope. Not at all. No issues here.
+            SetButtonLabel(button, "Getting link...")
             $.ajax(
                 {
                     type: "POST",
@@ -131,7 +118,10 @@ function DownloadFile(href, button)
                     },
                     success: function (data) {
                         if (button)
+                        {
                             button.downloading = false
+                            SetButtonLabel(button, originalText)
+                        }
 
                         if (data && data.url) {
                             window.location.href = data.url;
@@ -140,7 +130,7 @@ function DownloadFile(href, button)
                             $('a svg.icon-endorse').parent().removeClass('btn-inactive');
                             $('a svg.icon-vote').parent().removeClass('btn-inactive');
                             $.magnificPopup.close();
-                            AddButtonEvents()
+
                             ClosePopUp() // Close mod requirements popup if any
                         } else {
                             console.error("GenerateDownloadUrl failed; Got data ", data)
@@ -149,7 +139,10 @@ function DownloadFile(href, button)
                     },
                     error: function (_, s, e) {
                         if (button)
+                        {
                             button.downloading = false
+                            SetButtonLabel(button, originalText)
+                        }
 
                         console.error("Download request failed for file", fileId, s, e)
                         DisplayPopup("DownloadFix script error", "Download request failed!")
@@ -168,11 +161,17 @@ function DownloadFile(href, button)
 function PatchButton(button) {
     var link = button.getAttribute("href")
 
+    if (!link)
+    {
+      console.log("btn has no href")
+      return false
+    }
+
     if (link.includes("ModRequirementsPopUp") || link.includes("download-top-left-panel"))
     {
-        return
+        return false
     }
-    
+
     button.addEventListener("click", function (e) {
         e.preventDefault()
 
@@ -185,30 +184,13 @@ function PatchButton(button) {
     })
 
     button.patched = true
-    //console.log("patched", button)
+    return true
 }
 
 function IsDownloadButton(button)
 {
     var params = new URLSearchParams(new URL(button.getAttribute("href"), document.URL).search)
     return params.get("file_id") || (params.get("id") && params.get("game_id"))
-}
-
-function PatchButtonBySpanText(text) {
-    var q = $('a.btn span:contains("' + text + '")')
-    if (q.length == 0 || q[0].patched) {
-        return
-    }
-    
-    var btn = q[0].parentNode
-    // We don't want to patch this button if it just leads to the files page, because I guess that's a thing for mods with multiple main files.
-    if (IsDownloadButton(btn)) 
-    {
-        PatchButton(btn)
-        AddButtonEvent(btn)
-    }
-    q[0].patched = true
-    console.log("Patched", text, "button")
 }
 
 function PatchDownloadButtons() {
@@ -237,7 +219,7 @@ function PatchDownloadButtons() {
             {
                 PatchButton(button)
             }
-            
+
         }
     }
 
@@ -261,59 +243,33 @@ function InitializePatches()
     }
 }
 
-function AddButtonEvent(btn)
-{
-    window.jQuery(btn).magnificPopup({
-        type: 'ajax',
-        fixedContentPos: false,
-        callbacks: {
-            parseAjax: function (mfpResponse) {
-                mfpResponse.data = $.parseHTML(mfpResponse.data);
-                PatchButton($(mfpResponse.data).find("a.btn")[0])
-            }
-        }
-    })
-}
-
-function AddButtonEvents()
-{
-    var buttons = window.jQuery('.popup-btn-ajax > span:contains("download")').parent().magnificPopup({
-        type: 'ajax',
-        fixedContentPos: false,
-        callbacks: {
-            parseAjax: function (mfpResponse) {
-                mfpResponse.data = $.parseHTML(mfpResponse.data);
-                PatchButton($(mfpResponse.data).find("a.btn")[0])
-            }
-        },
-    })
-    //console.log(buttons)
-}
-
 function Initialize() {
     if (document.URL.indexOf("&file_id=") == -1) // Is this NOT the download page?
     {
-        PatchButtonBySpanText("Manual")
-        PatchButtonBySpanText("Vortex")
-
-        // If only I knew about this stuff sooner
-        
         window.jQuery(document).ajaxComplete(function (e, request, settings) {
-            //console.log("ajaxComplete", settings)
             if (settings.url.indexOf("ModFilesTab") != -1) // Was the files tab just loaded?
             {
                 InitializePatches() // do button patches then
                 RemoveAdblockBanner()
             }
 
-            AddButtonEvents()
+            if (settings.url.indexOf("ModRequirementsPopUp") != -1) // Patch any popup download buttons
+            {
+                let btn = $(".widget-mod-requirements > a")
+                if (btn)
+                {
+                    //btn.css('background-color', '#EB8E01');
+                    PatchButton(btn[0])
+                    console.log("Patched popup button")
+                }
+            }
+
         })
 
         if (document.URL.indexOf("?tab=files") > -1) // Do initial patches if we're loading the files page directly.
         {
             InitializePatches()
             RemoveAdblockBanner()
-            AddButtonEvents()
         }
 
         return
@@ -325,13 +281,9 @@ function Initialize() {
         var slowBtn = $('#slowDownloadButton')
         var fastBtn = $('#fastDownloadButton')
 
-        // free shitty memes
-        slowBtn.children("span").text("BOO YOU SUCK");
-        fastBtn.children("span").text("BUY PREMIUM BRO");
-
         console.log("Downloading file")
 
-        DownloadFile(document.URL) // No clue if it actually works properly on this page; Don't feel like testing it right now
+        DownloadFile(document.URL) // Auto download in case this page comes up
     }
 }
 window.onload = Initialize
