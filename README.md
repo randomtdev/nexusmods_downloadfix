@@ -26,6 +26,7 @@ After installing an extension of your choice, you can go to the install link and
 
 **1.6.1**
 - Fix script not working for downloads with no mod requirements
+- Fix some buttons not being patched if not on the files tab
 
 **1.6**
 - Fix script
